@@ -15,6 +15,7 @@ const servidores = {
         connection: null,
         dispatcher: null,
         fila: [],
+        filaTitulo: [],
         tocando: false
     }
 }
@@ -24,6 +25,10 @@ client.on("ready", () => {
 });
 
 client.on("message", async (msg) => {
+
+    if (msg.content === "-help") {
+        msg.channel.send('Lista de comandos:\n\n -play : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila');
+    }
 
     if (msg.content.startsWith("-play")) {
         try {
@@ -50,9 +55,12 @@ client.on("message", async (msg) => {
                     console.log(err);
                 }
                 if (resultado) {
+                    const titulo = resultado.data.items[0].snippet.title;
                     const id = resultado.data.items[0].id.videoId;
                     oQueTocar = 'https://www.youtube.com/watch?v=' + id;
                     servidores.server.fila.push(oQueTocar);
+                    servidores.server.filaTitulo.push(titulo);
+
                     console.log(servidores.server.fila);
                     tocaMusicas();
                 }
@@ -73,7 +81,8 @@ client.on("message", async (msg) => {
         if (servidores.server.fila.length === 0) {
             msg.channel.send('A fila está vazia.');
         } else {
-            servidores.server.fila.forEach(musica => { msg.channel.send(musica) });
+            index = 1;
+            servidores.server.filaTitulo.forEach(musica => { msg.channel.send(`${index++} - ${musica}`) });
         }
     }
     if (msg.content === "-clear") {
@@ -82,6 +91,7 @@ client.on("message", async (msg) => {
         } else {
             servidores.server.dispatcher.end();
             servidores.server.fila = [];
+            servidores.server.filaTitulo = [];
             msg.channel.send(msg.author.username + ' limpou a fila.');
         }
     }
