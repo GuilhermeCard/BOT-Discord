@@ -175,17 +175,4 @@ const tocaMusicas = () => {
         });
     }
 }
-
-let timeoutID;
-
-// After the queue has ended
-timeoutID = setTimeout(() => {
-    // This will run if the timeout reaches its end
-    // You can adapt the code above to disconnect from the voice channel
-}, 15 * 60 * 1000) // You should use the time in ms
-
-// If the bot is used again
-clearTimeout(timeoutID)
-timeoutID = undefined
-
 client.login(configs.TOKEN_DISCORD);
