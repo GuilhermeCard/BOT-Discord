@@ -2,6 +2,18 @@ const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const google = require('googleapis');
 const configs = require('./config.json');
+const express = require("express");
+const app = express();
+
+const port = process.env.PORT || 3000
+
+app.get("/", function (req, res) {
+    res.send("SERVIDOR ONLINE!")
+});
+
+app.listen(port, () => {
+    console.info(`SERVIDOR ONLINE EM http://localhost:${port}`);
+});
 
 const youtube = new google.youtube_v3.Youtube({
     version: 'v3',
@@ -163,4 +175,17 @@ const tocaMusicas = () => {
         });
     }
 }
+
+let timeoutID;
+
+// After the queue has ended
+timeoutID = setTimeout(() => {
+    // This will run if the timeout reaches its end
+    // You can adapt the code above to disconnect from the voice channel
+}, 15 * 60 * 1000) // You should use the time in ms
+
+// If the bot is used again
+clearTimeout(timeoutID)
+timeoutID = undefined
+
 client.login(configs.TOKEN_DISCORD);

@@ -13,6 +13,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
     "discord.js": "^12.5.1",
+    "express": "^4.17.1",
     "ffmpeg-static": "^4.4.0",
     "googleapis": "^85.0.0",
     "ytdl-core": "^4.9.1"
