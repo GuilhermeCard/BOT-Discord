@@ -38,8 +38,9 @@ client.on("ready", () => {
 
 client.on("message", async (msg) => {
 
+
     if (msg.content === "-help") {
-        msg.channel.send('Lista de comandos:\n\n -play : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila\n\n -force : Use este comando para forçar a reprodução de uma música');
+        msg.channel.send('Lista de comandos:\n\n -play ou -p : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila\n\n -force : Use este comando para forçar a reprodução de uma música');
     }
 
     if (msg.content.startsWith("-play") || msg.content.startsWith("-p")) {
@@ -53,24 +54,45 @@ client.on("message", async (msg) => {
 
         let oQueTocar = msg.content.startsWith("-play") ? msg.content.slice(6) : msg.content.slice(3);
 
-        youtube.search.list({
-            q: oQueTocar,
-            part: 'snippet',
-            fields: 'items(id(videoId),snippet(title))',
-            type: 'video'
-        }, function (err, resultado) {
-            if (err) {
-                console.log(err);
-            }
-            if (resultado) {
-                const id = resultado.data.items[0].id.videoId;
-                const titulo = resultado.data.items[0].snippet.title;
-                oQueTocar = 'https://www.youtube.com/watch?v=' + id;
-                servidores.server.fila.push(oQueTocar);
-                servidores.server.filaTitulo.push(titulo);
-                tocaMusicas();
-            }
-        });
+        if (ytdl.validateURL(oQueTocar)) {
+            servidores.server.fila.push(oQueTocar);
+            let videoId = ytdl.getURLVideoID(oQueTocar);
+            tocaMusicas();
+            youtube.search.list({
+                q: videoId,
+                part: 'snippet',
+                fields: 'items(id(videoId),snippet(title))',
+                type: 'video'
+            }, function (err, resultado) {
+                if (err) {
+                    console.log(err);
+                }
+                if (resultado) {
+                    const titulo = resultado.data.items[0].snippet.title;
+                    servidores.server.filaTitulo.push(titulo);
+                }
+            });
+
+        } else {
+            youtube.search.list({
+                q: oQueTocar,
+                part: 'snippet',
+                fields: 'items(id(videoId),snippet(title))',
+                type: 'video'
+            }, function (err, resultado) {
+                if (err) {
+                    console.log(err);
+                }
+                if (resultado) {
+                    const id = resultado.data.items[0].id.videoId;
+                    const titulo = resultado.data.items[0].snippet.title;
+                    oQueTocar = 'https://youtu.be/' + id;
+                    servidores.server.fila.push(oQueTocar);
+                    servidores.server.filaTitulo.push(titulo);
+                    tocaMusicas();
+                }
+            });
+        }
     };
 
     if (msg.content.startsWith("-force")) {
@@ -85,32 +107,44 @@ client.on("message", async (msg) => {
 
         let oQueTocar = msg.content.slice(7);
 
-        youtube.search.list({
-            q: oQueTocar,
-            part: 'snippet',
-            fields: 'items(id(videoId),snippet(title))',
-            type: 'video'
-        }, function (err, resultado) {
-            if (err) {
-                console.log(err);
-            }
-            if (resultado) {
+        if (ytdl.validateURL(oQueTocar)) {
+            let stream = ytdl(oQueTocar, { filter: 'audioonly' });
+            servidores.server.dispatcher = servidores.server.connection.play(stream);
+            servidores.server.dispatcher.on('finish', () => {
+                servidores.server.tocando = false;
+                if (servidores.server.fila.length > 0) {
+                    tocaMusicas();
+                } else {
+                    servidores.server.dispatcher = null;
+                }
+            });
+        } else {
+            youtube.search.list({
+                q: oQueTocar,
+                part: 'snippet',
+                fields: 'items(id(videoId),snippet(title))',
+                type: 'video'
+            }, function (err, resultado) {
+                if (err) {
+                    console.log(err);
+                }
+                if (resultado) {
 
-                const id = resultado.data.items[0].id.videoId;
-                oQueTocar = 'https://www.youtube.com/watch?v=' + id;
-
-                servidores.server.dispatcher = servidores.server.connection.play(ytdl(oQueTocar), { filter: 'audioonly' });
-
-                servidores.server.dispatcher.on('finish', () => {
-                    servidores.server.tocando = false;
-                    if (servidores.server.fila.length > 0) {
-                        tocaMusicas();
-                    } else {
-                        servidores.server.dispatcher = null;
-                    }
-                });
-            }
-        });
+                    const id = resultado.data.items[0].id.videoId;
+                    oQueTocar = 'https://youtu.be/' + id;
+                    let stream = ytdl(oQueTocar, { filter: 'audioonly' });
+                    servidores.server.dispatcher = servidores.server.connection.play(stream);
+                    servidores.server.dispatcher.on('finish', () => {
+                        servidores.server.tocando = false;
+                        if (servidores.server.fila.length > 0) {
+                            tocaMusicas();
+                        } else {
+                            servidores.server.dispatcher = null;
+                        }
+                    });
+                }
+            });
+        }
     }
 
     if (msg.content === "-pause") {
@@ -156,13 +190,35 @@ client.on("message", async (msg) => {
             msg.channel.send(msg.author.username + ' limpou a fila.');
         }
     }
+
 });
+
+// client.on("voiceStateUpdate", (oldMember, newMember) => {
+//     let newUserChannel = newMember.voiceChannel
+//     let oldUserChannel = oldMember.voiceChannel
+//     var channel = bot.channels.get('614299678300831744');
+
+
+//     if (oldUserChannel === undefined && newUserChannel !== 615306755420717143) {
+//         channel.send(newMember + ' has been verified.');
+//         let role = newMember.guild.roles.find(role => role.name === "Verified");
+//         newMember.addRole(role);
+//         let verifyEmbed = new Discord.RichEmbed()
+//             .setAuthor("Verificaiton")
+//             .setDescription("You have been verified")
+//             .setFooter(newMember.guild.name)
+//             .setColor("#98AFC7")
+//         newMember.sendMessage(verifyEmbed);
+//         newMember.setChannel(null);
+//     }
+// });
 
 const tocaMusicas = () => {
     if (servidores.server.tocando === false) {
         const filaParaTocar = servidores.server.fila[0];
         servidores.server.tocando = true;
-        servidores.server.dispatcher = servidores.server.connection.play(ytdl(filaParaTocar), { filter: 'audioonly' });
+        let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
+        servidores.server.dispatcher = servidores.server.connection.play(stream);
         servidores.server.dispatcher.on('finish', () => {
             servidores.server.fila.shift();
             servidores.server.filaTitulo.shift();
