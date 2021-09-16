@@ -193,26 +193,6 @@ client.on("message", async (msg) => {
 
 });
 
-// client.on("voiceStateUpdate", (oldMember, newMember) => {
-//     let newUserChannel = newMember.voiceChannel
-//     let oldUserChannel = oldMember.voiceChannel
-//     var channel = bot.channels.get('614299678300831744');
-
-
-//     if (oldUserChannel === undefined && newUserChannel !== 615306755420717143) {
-//         channel.send(newMember + ' has been verified.');
-//         let role = newMember.guild.roles.find(role => role.name === "Verified");
-//         newMember.addRole(role);
-//         let verifyEmbed = new Discord.RichEmbed()
-//             .setAuthor("Verificaiton")
-//             .setDescription("You have been verified")
-//             .setFooter(newMember.guild.name)
-//             .setColor("#98AFC7")
-//         newMember.sendMessage(verifyEmbed);
-//         newMember.setChannel(null);
-//     }
-// });
-
 const tocaMusicas = () => {
     if (servidores.server.tocando === false) {
         const filaParaTocar = servidores.server.fila[0];
