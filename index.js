@@ -38,12 +38,16 @@ client.on("ready", () => {
 
 client.on("message", async (msg) => {
 
-
     if (msg.content === "-help") {
         msg.channel.send('Lista de comandos:\n\n -play ou -p : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila\n\n -force : Use este comando para forçar a reprodução de uma música');
     }
 
     if (msg.content.startsWith("-play") || msg.content.startsWith("-p")) {
+        if (msg.content === "-pause") {
+            servidores.server.dispatcher.pause();
+            return
+        }
+
         try {
             servidores.server.connection = await msg.member.voice.channel.join();
         }
@@ -145,10 +149,6 @@ client.on("message", async (msg) => {
                 }
             });
         }
-    }
-
-    if (msg.content === "-pause") {
-        servidores.server.dispatcher.pause();
     }
 
     if (msg.content === "-resume") {

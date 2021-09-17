@@ -1,4 +1,5 @@
 {
     "TOKEN_DISCORD": "ODgzODQwNTgwOTg2MjEyMzky.YTPyrw.gZw5eDhs50OPl0f7PAJ9mgO3xMU",
-    "GOOGLE_KEY": "AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8"
+    "GOOGLE_KEY": "AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8",
+    "PREFIX": "-"
 }
