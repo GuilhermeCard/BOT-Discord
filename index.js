@@ -38,14 +38,23 @@ client.on("ready", () => {
 
 client.on("message", async (msg) => {
 
-    const timer = () => {
-        setInterval(function () {
+    const leaveByInactivity = () => {
+        setTimeout(function () {
             if (servidores.server.tocando == true) {
-                timer();
+                leaveByInactivity();
             } else {
-                msg.member.voice.channel.leave()
+                setTimeout(function () {
+                    if (servidores.server.tocando == false) {
+                        servidores.server.dispatcher = null;
+                        servidores.server.fila = [];
+                        servidores.server.filaTitulo = [];
+                        msg.member.voice.channel.leave();
+                    } else {
+                        leaveByInactivity();
+                    }
+                }, 600000)
             }
-        }, 600000);
+        }, 1000);
     }
 
     if (msg.content === "-help") {
@@ -53,7 +62,7 @@ client.on("message", async (msg) => {
     }
 
     if (msg.content.startsWith("-play") || msg.content.startsWith("-p")) {
-        timer();
+        leaveByInactivity();
         if (msg.content === "-pause") {
             servidores.server.dispatcher.pause();
             return
@@ -111,7 +120,7 @@ client.on("message", async (msg) => {
     };
 
     if (msg.content.startsWith("-force")) {
-        timer();
+        leaveByInactivity();
         if (servidores.server.connection == null) {
             try {
                 servidores.server.connection = await msg.member.voice.channel.join();
