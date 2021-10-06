@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = process.env.GOOGLE_KEY;
-const token = process.env.TOKEN;
+const google_key = 'AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8';
+const token = 'ODgzODQwNTgwOTg2MjEyMzky.YTPyrw.vPWALMroGCKDKy-TJbikwUwqXcM';
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
@@ -41,11 +41,11 @@ client.on("message", async (msg) => {
 
     const leaveByInactivity = () => {
         setTimeout(function () {
-            if (servidores.server.tocando == true) {
+            if (servidores.server.fila.length > 0) {
                 leaveByInactivity();
             } else {
                 setTimeout(function () {
-                    if (servidores.server.tocando == false) {
+                    if (servidores.server.fila.length = 0) {
                         servidores.server.dispatcher = null;
                         servidores.server.fila = [];
                         servidores.server.filaTitulo = [];
@@ -55,19 +55,69 @@ client.on("message", async (msg) => {
                     }
                 }, 600000)
             }
-        }, 1000);
+        }, 10000);
+    }
+
+    const joinVoicechannel = async () => {
+        try {
+            servidores.server.connection = await msg.member.voice.channel.join();
+        }
+        catch (err) {
+            console.log('Erro ao entrar no canal de voz!');
+            console.log(err);
+        }
     }
 
     if (msg.content === "-help") {
-        msg.channel.send('Lista de comandos:\n\n -play ou -p : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila\n\n -force : Use este comando para forçar a reprodução de uma música');
+        msg.channel.send('Lista de comandos:\n\n -play ou -p : Use este comando para reproduzir uma música a seu gosto de acordo com o que você escrever, ex: "-play <título da música aqui>" ou "-play <link da música no youtube>"\n\n -pause : Este comando pausa a reprodução da música atual\n\n -resume : Este comando retoma a música atual a partir do momento em que ela foi pausada\n\n -skip : Este comando pula para a próxima música da fila\n\n -queue : Este comando lista todas as músicas da fila\n\n -clear : Este comando deleta todas as músicas da fila\n\n -force : Use este comando para forçar a reprodução de uma música\n\n -playlist : Use este comando para reproduzir uma playlist do youtube, ex "-playlist <link da playlist no youtube>');
     }
 
-    if (msg.content.startsWith("-play") || msg.content.startsWith("-p")) {
-        leaveByInactivity();
-        if (msg.content === "-pause") {
-            servidores.server.dispatcher.pause();
-            return
+    let oQueTocar = msg.content;
+
+    if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-playlist") {
+        joinVoicechannel();
+        oQueTocar = oQueTocar.slice(10);
+
+        const regex = /[&?]list=([^&]+)/i;
+        const str = ` ${oQueTocar}`;
+        let playlistId;
+
+        if ((playlistId = regex.exec(str)) !== null) {
+            playlistId = playlistId[1];
+        } else {
+            msg.channel.send("O link não é válido ou não foi possível identificar essa playlist :slight_frown:")
+            return;
         }
+
+        oQueTocar = playlistId;
+
+        youtube.playlistItems.list({
+            part: 'snippet',
+            playlistId: oQueTocar,
+            maxResults: 15
+        }, function (err, resultado) {
+            if (err) {
+                console.log(err);
+            }
+            if (resultado) {
+                let videoId;
+                let titulo;
+                for (var i in resultado.data.items) {
+                    titulo = resultado.data.items[i].snippet.title;
+                    servidores.server.filaTitulo.push(titulo);
+
+                    videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`
+                    servidores.server.fila.push(videoId);
+                }
+                setTimeout(function () {
+                    tocaMusicas();
+                }, 2000);
+            }
+        })
+    }
+
+    if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-play" || oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-p") {
+        leaveByInactivity();
 
         try {
             servidores.server.connection = await msg.member.voice.channel.join();
@@ -77,12 +127,18 @@ client.on("message", async (msg) => {
             console.log(err);
         }
 
-        let oQueTocar = msg.content.startsWith("-play") ? msg.content.slice(6) : msg.content.slice(3);
+        if (oQueTocar === "-play") {
+            oQueTocar = oQueTocar.slice(6)
+        } else {
+            oQueTocar = oQueTocar.slice(3)
+        }
 
         if (ytdl.validateURL(oQueTocar)) {
             servidores.server.fila.push(oQueTocar);
             let videoId = ytdl.getURLVideoID(oQueTocar);
-            tocaMusicas();
+            setTimeout(function () {
+                tocaMusicas();
+            }, 1000);
             youtube.search.list({
                 q: videoId,
                 part: 'snippet',
@@ -114,7 +170,9 @@ client.on("message", async (msg) => {
                     oQueTocar = 'https://youtu.be/' + id;
                     servidores.server.fila.push(oQueTocar);
                     servidores.server.filaTitulo.push(titulo);
-                    tocaMusicas();
+                    setTimeout(function () {
+                        tocaMusicas();
+                    }, 1000);
                 }
             });
         }
@@ -173,6 +231,10 @@ client.on("message", async (msg) => {
         }
     }
 
+    if (msg.content === "-pause") {
+        servidores.server.dispatcher.pause();
+    }
+
     if (msg.content === "-resume") {
         servidores.server.dispatcher.resume();
     }
@@ -217,6 +279,7 @@ client.on("message", async (msg) => {
 });
 
 const tocaMusicas = () => {
+
     if (servidores.server.tocando === false) {
         const filaParaTocar = servidores.server.fila[0];
         servidores.server.tocando = true;
