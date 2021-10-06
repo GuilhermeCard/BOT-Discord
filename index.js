@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = 'AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8';
-const token = 'ODgzODQwNTgwOTg2MjEyMzky.YTPyrw.vPWALMroGCKDKy-TJbikwUwqXcM';
+const google_key = process.env.GOOGLE_KEY;
+const token = process.env.TOKEN;
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
