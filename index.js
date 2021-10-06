@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = process.env.GOOGLE_KEY
-const token = process.env.TOKEN
+const google_key = process.env.GOOGLE_KEY;
+const token = process.env.TOKEN;
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
@@ -18,7 +18,7 @@ app.listen(port, () => {
 
 const youtube = new google.youtube_v3.Youtube({
     version: 'v3',
-    auth: `${google_key}`
+    auth: google_key
 });
 
 const client = new Discord.Client();
@@ -234,4 +234,4 @@ const tocaMusicas = () => {
         });
     }
 }
-client.login(`${token}`);
+client.login(token);
