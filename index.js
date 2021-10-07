@@ -103,17 +103,18 @@ client.on("message", async (msg) => {
             }
             if (resultado) {
                 let videoId;
+                let titulo;
 
-                await resultado.data.items.snippet.resourceId.videoId.forEach(result => {
-                    videoId = 'https://youtu.be/' + result;
+                resultado.data.items.forEach(result => {
+                    videoId = 'https://youtu.be/' + result.snippet.resourceId.videoId;
                     servidores.server.fila.push(videoId);
-                });
 
-                resultado.data.items.snippet.title.forEach(res => {
-                    servidores.server.filaTitulo.push(res);
+                    titulo = result.snippet.title;
+                    servidores.server.filaTitulo.push(titulo);
+
                 });
+                tocaMusicas();
             }
-            tocaMusicas();
         });
     }
 
