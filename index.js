@@ -147,6 +147,8 @@ client.on("message", async (msg) => {
             }, function (err, resultado) {
                 if (err) {
                     console.log(err);
+                    msg.channel.send("Não consegui achar essa música, tente outro link!");
+                    return;
                 }
                 if (resultado) {
                     const titulo = resultado.data.items[0].snippet.title;
@@ -163,6 +165,8 @@ client.on("message", async (msg) => {
             }, function (err, resultado) {
                 if (err) {
                     console.log(err);
+                    msg.channel.send("Não consegui achar essa música, tente outro link!");
+                    return;
                 }
                 if (resultado) {
                     const id = resultado.data.items[0].id.videoId;
@@ -211,6 +215,8 @@ client.on("message", async (msg) => {
             }, function (err, resultado) {
                 if (err) {
                     console.log(err);
+                    msg.channel.send("Não consegui achar essa música, tente outro link!");
+                    return;
                 }
                 if (resultado) {
 
