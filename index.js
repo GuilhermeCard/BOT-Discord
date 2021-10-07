@@ -111,11 +111,9 @@ client.on("message", async (msg) => {
                     videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`
                     servidores.server.fila.push(videoId);
                 }
-
-                tocaMusicas();
-
             }
-        })
+            tocaMusicas();
+        });
     }
 
     if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-play" || oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-p") {
