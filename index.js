@@ -284,7 +284,13 @@ const tocaMusicas = () => {
 
     setTimeout(function () {
         if (servidores.server.tocando === false) {
-            const filaParaTocar = servidores.server.fila[0];
+            let filaParaTocar;
+            if (servidores.server.fila[0] != undefined) {
+                filaParaTocar = servidores.server.fila[0];
+            } else {
+                console.log("A fila ainda está vazia!")
+                return;
+            }
             servidores.server.tocando = true;
             let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
             servidores.server.dispatcher = servidores.server.connection.play(stream);
