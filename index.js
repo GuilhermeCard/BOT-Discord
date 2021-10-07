@@ -103,19 +103,15 @@ client.on("message", async (msg) => {
             }
             if (resultado) {
                 let videoId;
-                let titulo;
-                videoId = `https://youtu.be/${resultado.data.items[0].snippet.resourceId.videoId}`
-                servidores.server.fila.push(videoId);
 
-                for (let i = 1; i < resultado.data.items.length; i++) {
-
-                    videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`
+                await resultado.data.items.snippet.resourceId.videoId.forEach(result => {
+                    videoId = 'https://youtu.be/' + result;
                     servidores.server.fila.push(videoId);
+                });
 
-                    titulo = resultado.data.items[i].snippet.title;
-                    servidores.server.filaTitulo.push(titulo);
-
-                }
+                resultado.data.items.snippet.title.forEach(res => {
+                    servidores.server.filaTitulo.push(res);
+                });
             }
             tocaMusicas();
         });
