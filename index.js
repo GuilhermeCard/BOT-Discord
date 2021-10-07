@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = process.env.GOOGLE_KEY;
-const token = process.env.TOKEN;
+const google_key = process.env.GOOGLE_KEY
+const token = process.env.TOKEN
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
@@ -98,6 +98,8 @@ client.on("message", async (msg) => {
         }, function (err, resultado) {
             if (err) {
                 console.log(err);
+                msg.channel.send("O link não é válido ou não foi possível identificar essa playlist :slight_frown:")
+                return;
             }
             if (resultado) {
                 let videoId;
@@ -136,9 +138,9 @@ client.on("message", async (msg) => {
         if (ytdl.validateURL(oQueTocar)) {
             servidores.server.fila.push(oQueTocar);
             let videoId = ytdl.getURLVideoID(oQueTocar);
-            setTimeout(function () {
-                tocaMusicas();
-            }, 1000);
+
+            tocaMusicas();
+
             youtube.search.list({
                 q: videoId,
                 part: 'snippet',
@@ -170,9 +172,9 @@ client.on("message", async (msg) => {
                     oQueTocar = 'https://youtu.be/' + id;
                     servidores.server.fila.push(oQueTocar);
                     servidores.server.filaTitulo.push(titulo);
-                    setTimeout(function () {
-                        tocaMusicas();
-                    }, 1000);
+
+                    tocaMusicas();
+
                 }
             });
         }
