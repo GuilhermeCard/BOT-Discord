@@ -111,9 +111,9 @@ client.on("message", async (msg) => {
                     videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`
                     servidores.server.fila.push(videoId);
                 }
-                setTimeout(function () {
-                    tocaMusicas();
-                }, 2000);
+
+                tocaMusicas();
+
             }
         })
     }
@@ -282,21 +282,23 @@ client.on("message", async (msg) => {
 
 const tocaMusicas = () => {
 
-    if (servidores.server.tocando === false) {
-        const filaParaTocar = servidores.server.fila[0];
-        servidores.server.tocando = true;
-        let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
-        servidores.server.dispatcher = servidores.server.connection.play(stream);
-        servidores.server.dispatcher.on('finish', () => {
-            servidores.server.fila.shift();
-            servidores.server.filaTitulo.shift();
-            servidores.server.tocando = false;
-            if (servidores.server.fila.length > 0) {
-                tocaMusicas();
-            } else {
-                servidores.server.dispatcher = null;
-            }
-        });
-    }
+    setTimeout(function () {
+        if (servidores.server.tocando === false) {
+            const filaParaTocar = servidores.server.fila[0];
+            servidores.server.tocando = true;
+            let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
+            servidores.server.dispatcher = servidores.server.connection.play(stream);
+            servidores.server.dispatcher.on('finish', () => {
+                servidores.server.fila.shift();
+                servidores.server.filaTitulo.shift();
+                servidores.server.tocando = false;
+                if (servidores.server.fila.length > 0) {
+                    tocaMusicas();
+                } else {
+                    servidores.server.dispatcher = null;
+                }
+            });
+        }
+    }, 2000);
 }
 client.login(token);
