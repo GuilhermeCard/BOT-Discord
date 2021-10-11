@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = process.env.GOOGLE_KEY || 'AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8'
-const token = process.env.TOKEN || 'ODgzODQwNTgwOTg2MjEyMzky.YTPyrw.a1TQTknjyw9nl17gbWc6C9YFxN8'
+const google_key = process.env.GOOGLE_KEY
+const token = process.env.TOKEN
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
@@ -305,7 +305,7 @@ const tocaMusicas = () => {
                     servidores.server.dispatcher = null;
                 }
             });
-        }, 2000);
+        }, 3000);
     }
 }
 client.login(token);
