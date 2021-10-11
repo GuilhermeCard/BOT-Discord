@@ -306,7 +306,7 @@ const tocaMusicas = () => {
                     servidores.server.dispatcher = null;
                 }
             });
-        }, 2000);
+        }, 4000);
     }
 }
 client.login(token);
