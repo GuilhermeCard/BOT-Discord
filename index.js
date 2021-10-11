@@ -172,7 +172,6 @@ client.on("message", async (msg) => {
                     return;
                 }
                 if (resultado) {
-                    console.log(resultado);
                     const id = resultado.data.items[0].id.videoId;
                     const titulo = resultado.data.items[0].snippet.title;
                     oQueTocar = 'https://youtu.be/' + id;
@@ -292,8 +291,10 @@ const tocaMusicas = () => {
     if (servidores.server.tocando === false) {
         let filaParaTocar = servidores.server.fila[0];
         servidores.server.tocando = true;
+
         let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
-        setTimeout(function () {
+
+        setTimeout(() => {
             servidores.server.dispatcher = servidores.server.connection.play(stream);
             servidores.server.dispatcher.on('finish', () => {
                 servidores.server.fila.shift();
@@ -305,7 +306,7 @@ const tocaMusicas = () => {
                     servidores.server.dispatcher = null;
                 }
             });
-        }, 3000);
+        }, 2000);
     }
 }
 client.login(token);
