@@ -5,8 +5,8 @@ const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000
-const google_key = process.env.GOOGLE_KEY
-const token = process.env.TOKEN
+const google_key = process.env.GOOGLE_KEY || 'AIzaSyBxEx53N0Ih7jCSBl2k_KWAuyaLprXvsB8'
+const token = process.env.TOKEN || 'ODgzODQwNTgwOTg2MjEyMzky.YTPyrw.a1TQTknjyw9nl17gbWc6C9YFxN8'
 
 app.get("/", function (req, res) {
     res.send("SERVIDOR ONLINE!")
@@ -102,18 +102,19 @@ client.on("message", async (msg) => {
                 return;
             }
             if (resultado) {
-                let videoId;
-                let titulo;
-
-                resultado.data.items.forEach(result => {
-                    videoId = 'https://youtu.be/' + result.snippet.resourceId.videoId;
-                    servidores.server.fila.push(videoId);
-
-                    titulo = result.snippet.title;
-                    servidores.server.filaTitulo.push(titulo);
-
-                });
+                const id = resultado.data.items[0].snippet.resourceId.videoId;
+                const titulo = resultado.data.items[0].snippet.title;
+                oQueTocar = 'https://youtu.be/' + id;
+                servidores.server.fila.push(oQueTocar);
+                servidores.server.filaTitulo.push(titulo);
                 tocaMusicas();
+
+                for (let i = 1; i < resultado.data.items.length; i++) {
+                    let videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`;
+                    servidores.server.fila.push(videoId);
+                    let titulo = resultado.data.items[i].snippet.title;
+                    servidores.server.filaTitulo.push(titulo);
+                }
             }
         });
     }
@@ -129,7 +130,7 @@ client.on("message", async (msg) => {
             console.log(err);
         }
 
-        if (oQueTocar === "-play") {
+        if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-play") {
             oQueTocar = oQueTocar.slice(6)
         } else {
             oQueTocar = oQueTocar.slice(3)
@@ -171,6 +172,7 @@ client.on("message", async (msg) => {
                     return;
                 }
                 if (resultado) {
+                    console.log(resultado);
                     const id = resultado.data.items[0].id.videoId;
                     const titulo = resultado.data.items[0].snippet.title;
                     oQueTocar = 'https://youtu.be/' + id;
@@ -178,7 +180,6 @@ client.on("message", async (msg) => {
                     servidores.server.filaTitulo.push(titulo);
 
                     tocaMusicas();
-
                 }
             });
         }
@@ -288,17 +289,11 @@ client.on("message", async (msg) => {
 
 const tocaMusicas = () => {
 
-    setTimeout(function () {
-        if (servidores.server.tocando === false) {
-            let filaParaTocar;
-            if (servidores.server.fila[0] != undefined) {
-                filaParaTocar = servidores.server.fila[0];
-            } else {
-                console.log("A fila ainda está vazia!")
-                return;
-            }
-            servidores.server.tocando = true;
-            let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
+    if (servidores.server.tocando === false) {
+        let filaParaTocar = servidores.server.fila[0];
+        servidores.server.tocando = true;
+        let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
+        setTimeout(function () {
             servidores.server.dispatcher = servidores.server.connection.play(stream);
             servidores.server.dispatcher.on('finish', () => {
                 servidores.server.fila.shift();
@@ -310,7 +305,7 @@ const tocaMusicas = () => {
                     servidores.server.dispatcher = null;
                 }
             });
-        }
-    }, 2000);
+        }, 2000);
+    }
 }
 client.login(token);
