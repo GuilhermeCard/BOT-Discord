@@ -45,7 +45,7 @@ client.on("message", async (msg) => {
                 leaveByInactivity();
             } else {
                 setTimeout(function () {
-                    if (servidores.server.fila.length = 0) {
+                    if (servidores.server.fila.length == 0) {
                         servidores.server.dispatcher = null;
                         servidores.server.fila = [];
                         servidores.server.filaTitulo = [];
@@ -76,6 +76,7 @@ client.on("message", async (msg) => {
 
     if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-playlist") {
         joinVoicechannel();
+        leaveByInactivity();
         oQueTocar = oQueTocar.slice(10);
 
         const regex = /[&?]list=([^&]+)/i;
