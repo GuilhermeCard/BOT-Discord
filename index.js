@@ -108,17 +108,16 @@ client.on("message", async (msg) => {
                 oQueTocar = 'https://youtu.be/' + id;
                 servidores.server.fila.push(oQueTocar);
                 servidores.server.filaTitulo.push(titulo);
-                msg.channel.send("Carregando playlist...");
-                for (let i = 1; i < resultado.data.items.length; i++) {
-                    let videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`;
-                    servidores.server.fila.push(videoId);
-                    let titulo = resultado.data.items[i].snippet.title;
-                    servidores.server.filaTitulo.push(titulo);
-                }
-                setTimeout(() => {
-                    msg.channel.send("Playlist carregada!");
+
+                setTimeout(function () {
                     tocaMusicas();
-                }, 5000);
+                    for (let i = 1; i < resultado.data.items.length; i++) {
+                        let videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`;
+                        servidores.server.fila.push(videoId);
+                        let titulo = resultado.data.items[i].snippet.title;
+                        servidores.server.filaTitulo.push(titulo);
+                    }
+                }, 2000);
             }
         });
     }
@@ -290,7 +289,7 @@ client.on("message", async (msg) => {
 
 });
 
-const tocaMusicas = () => {
+const tocaMusicas = function () {
 
     if (servidores.server.tocando === false) {
         let filaParaTocar = servidores.server.fila[0];
