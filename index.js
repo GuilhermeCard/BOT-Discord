@@ -39,24 +39,24 @@ client.on("ready", () => {
 
 client.on("message", async (msg) => {
 
-    const leaveByInactivity = () => {
-        setTimeout(function () {
-            if (servidores.server.fila.length > 0) {
-                leaveByInactivity();
-            } else {
-                setTimeout(function () {
-                    if (servidores.server.fila.length == 0) {
-                        servidores.server.dispatcher = null;
-                        servidores.server.fila = [];
-                        servidores.server.filaTitulo = [];
-                        msg.member.voice.channel.leave();
-                    } else {
-                        leaveByInactivity();
-                    }
-                }, 600000)
-            }
-        }, 10000);
-    }
+    // const leaveByInactivity = () => {
+    //     setTimeout(function () {
+    //         if (servidores.server.fila.length > 0) {
+    //             leaveByInactivity();
+    //         } else {
+    //             setTimeout(function () {
+    //                 if (servidores.server.fila.length == 0) {
+    //                     servidores.server.dispatcher = null;
+    //                     servidores.server.fila = [];
+    //                     servidores.server.filaTitulo = [];
+    //                     msg.member.voice.channel.leave();
+    //                 } else {
+    //                     leaveByInactivity();
+    //                 }
+    //             }, 600000)
+    //         }
+    //     }, 10000);
+    // }
 
     const joinVoicechannel = async () => {
         try {
@@ -76,7 +76,7 @@ client.on("message", async (msg) => {
 
     if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-playlist") {
         joinVoicechannel();
-        leaveByInactivity();
+        // leaveByInactivity();
         oQueTocar = oQueTocar.slice(10);
 
         const regex = /[&?]list=([^&]+)/i;
@@ -108,7 +108,9 @@ client.on("message", async (msg) => {
                 oQueTocar = 'https://youtu.be/' + id;
                 servidores.server.fila.push(oQueTocar);
                 servidores.server.filaTitulo.push(titulo);
-                tocaMusicas();
+                setTimeout(() => {
+                    tocaMusicas();
+                }, 3000)
 
                 for (let i = 1; i < resultado.data.items.length; i++) {
                     let videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`;
@@ -121,7 +123,7 @@ client.on("message", async (msg) => {
     }
 
     if (oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-play" || oQueTocar.substring(0, oQueTocar.indexOf(' ')) === "-p") {
-        leaveByInactivity();
+        // leaveByInactivity();
 
         try {
             servidores.server.connection = await msg.member.voice.channel.join();
@@ -186,7 +188,7 @@ client.on("message", async (msg) => {
     };
 
     if (msg.content.startsWith("-force")) {
-        leaveByInactivity();
+        // leaveByInactivity();
         if (servidores.server.connection == null) {
             try {
                 servidores.server.connection = await msg.member.voice.channel.join();
@@ -295,19 +297,17 @@ const tocaMusicas = () => {
 
         let stream = ytdl(filaParaTocar, { filter: 'audioonly' });
 
-        setTimeout(() => {
-            servidores.server.dispatcher = servidores.server.connection.play(stream);
-            servidores.server.dispatcher.on('finish', () => {
-                servidores.server.fila.shift();
-                servidores.server.filaTitulo.shift();
-                servidores.server.tocando = false;
-                if (servidores.server.fila.length > 0) {
-                    tocaMusicas();
-                } else {
-                    servidores.server.dispatcher = null;
-                }
-            });
-        }, 4000);
+        servidores.server.dispatcher = servidores.server.connection.play(stream);
+        servidores.server.dispatcher.on('finish', () => {
+            servidores.server.fila.shift();
+            servidores.server.filaTitulo.shift();
+            servidores.server.tocando = false;
+            if (servidores.server.fila.length > 0) {
+                tocaMusicas();
+            } else {
+                servidores.server.dispatcher = null;
+            }
+        });
     }
 }
 client.login(token);
