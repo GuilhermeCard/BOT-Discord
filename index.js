@@ -108,16 +108,17 @@ client.on("message", async (msg) => {
                 oQueTocar = 'https://youtu.be/' + id;
                 servidores.server.fila.push(oQueTocar);
                 servidores.server.filaTitulo.push(titulo);
-                setTimeout(() => {
-                    tocaMusicas();
-                }, 3000)
-
+                msg.channel.send("Carregando playlist...");
                 for (let i = 1; i < resultado.data.items.length; i++) {
                     let videoId = `https://youtu.be/${resultado.data.items[i].snippet.resourceId.videoId}`;
                     servidores.server.fila.push(videoId);
                     let titulo = resultado.data.items[i].snippet.title;
                     servidores.server.filaTitulo.push(titulo);
                 }
+                setTimeout(() => {
+                    msg.channel.send("Playlist carregada!");
+                    tocaMusicas();
+                }, 5000);
             }
         });
     }
